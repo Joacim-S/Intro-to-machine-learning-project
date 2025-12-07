@@ -8,6 +8,7 @@ format:
 ```{python}
 #Tähän ulkopuoliset importit
 import matplotlib.pyplot as plt
+import pandas as pd
 ```
 
 ```{python}
@@ -69,12 +70,6 @@ print(RFE_df)
 
 on this table we can compare the improvements RFE provides, able to increase binary classification accuracy by couple percent compared to including all features.
 
-<span style="color:red;">
-Note: I was using liblinear LR model which cannot do multiclass classification. fix is todo. also could add more models
-</span>
-
-
-
 ```{python}
 LR1_results = cv_results[0].iloc[:40]
 LR2_results = cv_results[1].iloc[:40]
@@ -89,5 +84,46 @@ plt.show()
 ```
 
 We can see that increasing features results in better accuracy, usually having the best accuracy at 10-20 features.
-We currently only have linear regression with L1 (lasso) and L2 (ridge) penalties. After comparing fifferent models, we will probably use some combination of PCA and Feature selection in our final model
+We currently only have linear regression with L1 (lasso) and L2 (ridge) penalties. After comparing different models, we will probably use some combination of PCA and Feature selection in our final model
 
+# Feature analysis
+
+Analyzing coefficients allowed us to rank some features by usefulness. The ones for the plot below were defined by performance with logistic regression using 5-fold cross validation.
+
+```{python}
+df = pd.read_csv('train.csv')
+
+df = df.drop(columns=['id', 'date', 'partlybad'])
+
+train_x = df.drop(columns=['class4'])
+train_x = (train_x-train_x.mean())/train_x.std()
+
+train_y = df['class4']
+
+df = train_x.copy()
+df['class4'] = train_y
+
+best5 = ['CS.mean', 'SWS.std', 'RHIRGA672.mean', 'PAR.mean', 'Glob.mean']
+worst5 = ['NOx672.mean', 'CO2504.std','NO168.std', 'NO336.mean', 'CO2504.std']
+
+fig, axs = plt.subplots(2,5)
+
+nonevent_df = df[df['class4'] == 'nonevent']
+event_df = df[df['class4'] != 'nonevent']
+
+
+for i in range(0,10):
+
+  if i < 5:
+    axs[0,i].set_title(best5[i])
+    axs[0,i].boxplot([nonevent_df[best5[i]], event_df[best5[i]]], tick_labels=['non', 'event'], sym='_')
+  else:
+    axs[1,i-5].set_title(worst5[i-5])
+    axs[1,i-5].boxplot([nonevent_df[worst5[i-5]], event_df[worst5[i-5]]], tick_labels=['non', 'event'], sym='_')
+  
+
+plt.tight_layout()
+plt.show()
+```
+
+Here are boxplots of some of the most useful (top row), and least useful (bottom row) features for binary classification in the dataset. For the reliable features we can see that the quartaile ranges don't have much overlap, as for the unreliable features there is a lot of overlap between classes. CS.mean is an oulkier, where models find it very useful even though it has surprisingly similar boxplots between classes.

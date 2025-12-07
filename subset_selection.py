@@ -21,13 +21,13 @@ train_y = train_y.replace('II', 'event')
     
 
 
-clf_lasso = LogisticRegression(random_state=0, solver='liblinear', penalty='l1').fit(train_x, train_y)
-clf_ridge = LogisticRegression(random_state=0, solver='liblinear', penalty='l2').fit(train_x, train_y)
+clf_lasso = LogisticRegression(random_state=0, solver='liblinear', penalty='l1')
+clf_ridge = LogisticRegression(random_state=0, solver='liblinear', penalty='l2')
 
-sel1 = RFECV(clf_lasso, min_features_to_select=1, step=1 )
+sel1 = RFECV(clf_lasso, min_features_to_select=1, step=1)
 sel1.fit(train_x, train_y)
 
-sel2 = RFECV(clf_ridge, min_features_to_select=1, step=1 )
+sel2 = RFECV(clf_ridge, min_features_to_select=1, step=1)
 sel2.fit(train_x, train_y)
 
 #different outputs
@@ -61,7 +61,7 @@ opt_accuracy = [cv_results[0]["mean_test_score"][sel1.n_features_], cv_results[1
 avg_accuracy = [cv_results[0]["mean_test_score"][99], cv_results[1]["mean_test_score"][99]]
 
 RFE_df = pd.DataFrame({ 'Model': model, 'Optimal n of features': opt_features, 'Best accuracy': opt_accuracy, 'Accuracy without RFE': avg_accuracy})
-#print(RFE_df)
+RFE_df.set_index('Model')
 
 
 """ print("Optimal number of features:")
