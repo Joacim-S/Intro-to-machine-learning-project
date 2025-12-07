@@ -1,0 +1,57 @@
+---
+title: "Classifying New Particle Formation"
+execute: 
+  echo: false
+format:
+  pdf
+---
+```{python}
+#Tähän ulkopuoliset importit
+import matplotlib.pyplot as plt
+```
+
+```{python}
+#Tähän Eliaksen importit
+
+```
+
+```{python}
+#Tähän Joken importit
+import pca
+```
+
+Group: John 117
+
+Members: Elias Toukolehto and Joacim Sarén
+
+We decided to start by trying feature selection and dimensionality reduction via principal component analysis with a few different machine learning models.
+
+# Principal component analysis
+
+First we looked at cumulative proportion of variance explained by the principal components. We used l2 normalization. We looked at the behaviour of PCA and all the models at upto 100 components, but nothing interesting happened with any of them beyond about 40 components, so the charts here focus on 40 or less components. Accuracy is measured as the average accuracy using 10-fold cross validation.
+
+```{python}
+plt.plot(range(1, 41), pca.cum_pve)
+plt.hlines(1, 0, 40, 'red', 'dotted')
+plt.show()
+```
+
+Then we looked at the accuracy of logistic regression, decision tree and gaussian naive Bayes classifiers with different numbers of principal components for binary and multiclass classification.
+
+```{python}
+plt.plot(range(1, 41), pca.nbscore2, color='red', label='Naive Bayes')
+plt.plot(range(1, 41), pca.treescore2, color='blue', label='Decision tree')
+plt.plot(range(1, 41), pca.lrscore2, color='green', label='logistic regression')
+plt.legend()
+plt.title('Binary classification accuracy')
+plt.show()
+
+plt.plot(range(1, 41), pca.nbscore4, color='red', label='Naive Bayes')
+plt.plot(range(1, 41), pca.treescore4, color='blue', label='Decision tree')
+plt.plot(range(1, 41), pca.lrscore4, color='green', label='logistic regression')
+plt.legend()
+plt.title('Multiclass classification accuracy')
+plt.show()
+```
+
+The gaussian Naive Bayes classifier with 9 predictors is clearly the best oferall performer out of the tested models.
