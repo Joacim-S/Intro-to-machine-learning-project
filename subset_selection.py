@@ -37,31 +37,41 @@ print('number of features:', sel1.n_features_)
 print('number of features during fit:', sel1.n_features_in_)
 print(sel1.ranking_) """
 
+# 0 = LR with L1
+# 1 = LR with L2
+cv_results = []
 
 data = {
     key: value
     for key, value in sel1.cv_results_.items()
     if key in ["n_features", "mean_test_score", "std_test_score"]
 }
-cv_results1 = pd.DataFrame(data)
+cv_results.append(pd.DataFrame(data))
 
 data = {
     key: value
     for key, value in sel2.cv_results_.items()
     if key in ["n_features", "mean_test_score", "std_test_score"]
 }
-cv_results2 = pd.DataFrame(data)
+cv_results.append(pd.DataFrame(data))
+
+model = ['LR L1', 'LR L2']
+opt_features = [sel1.n_features_, sel2.n_features_]
+opt_accuracy = [cv_results[0]["mean_test_score"][sel1.n_features_], cv_results[1]["mean_test_score"][sel2.n_features_]]
+avg_accuracy = [cv_results[0]["mean_test_score"][99], cv_results[1]["mean_test_score"][99]]
+
+RFE_df = pd.DataFrame({ 'Model': model, 'Optimal n of features': opt_features, 'Best accuracy': opt_accuracy, 'Accuracy without RFE': avg_accuracy})
+#print(RFE_df)
 
 
+""" print("Optimal number of features:")
+print(f"For Lasso: {sel1.n_features_}, with accuracy of {cv_results[0]["mean_test_score"][sel1.n_features_]} (with all: {cv_results[0]["mean_test_score"][99]})")
+print(f"For Ridge regression: {sel2.n_features_}, with accuracy of {cv_results[1]["mean_test_score"][sel2.n_features_]} (with all: {cv_results[1]["mean_test_score"][99]}")
+ """
+""" cv_results1 = cv_results[0].iloc[:40]
+cv_results2 = cv_results[1].iloc[:40]
 
-print("Optimal number of features:")
-print(f"For Lasso: {sel1.n_features_}, with accuracy of {cv_results1["mean_test_score"][sel1.n_features_]} (with all: {cv_results1["mean_test_score"][99]})")
-print(f"For Ridge regression: {sel2.n_features_}, with accuracy of {cv_results2["mean_test_score"][sel2.n_features_]} (with all: {cv_results2["mean_test_score"][99]}")
-
-cv_results1 = cv_results1.iloc[:30]
-cv_results2 = cv_results2.iloc[:30]
-
-plt.suptitle("Recursive Feature Elimination for first 30 features")
+plt.suptitle("Recursive Feature Elimination for first 40 features")
 plt.subplot(2, 1, 1)
 plt.title("Lasso")
 plt.ylabel("Accuracy")
@@ -75,4 +85,14 @@ plt.scatter(cv_results2["n_features"],cv_results2["mean_test_score"])
 plt.plot(cv_results2["n_features"], cv_results2["mean_test_score"])
 
 plt.tight_layout()
-plt.show()
+plt.show() """
+
+""" LR1_results = cv_results[0].iloc[:40]
+LR2_results = cv_results[1].iloc[:40]
+
+plt.plot(LR1_results["n_features"], LR1_results["mean_test_score"], color='red')
+plt.plot(LR2_results["n_features"], LR2_results["mean_test_score"], color='blue')
+
+plt.legend()
+plt.title('RFE accuracy')
+plt.show() """

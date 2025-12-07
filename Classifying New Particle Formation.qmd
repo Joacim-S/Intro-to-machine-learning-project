@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 
 ```{python}
 #Tähän Eliaksen importit
-
+from subset_selection import cv_results, RFE_df
 ```
 
 ```{python}
@@ -24,9 +24,11 @@ Group: John 117
 
 Members: Elias Toukolehto and Joacim Sarén
 
+# Preprocessing
+
 We decided to start by trying feature selection and dimensionality reduction via principal component analysis with a few different machine learning models.
 
-# Principal component analysis
+## Principal component analysis
 
 First we looked at cumulative proportion of variance explained by the principal components. We used l2 normalization. We looked at the behaviour of PCA and all the models at upto 100 components, but nothing interesting happened with any of them beyond about 40 components, so the charts here focus on 40 or less components. Accuracy is measured as the average accuracy using 10-fold cross validation.
 
@@ -55,3 +57,37 @@ plt.show()
 ```
 
 The gaussian Naive Bayes classifier with 9 predictors is clearly the best oferall performer out of the tested models.
+
+## Feature selection
+
+Another preprocessing method is feature selection, for which we have used Recursive Feature elimination using 5-fold cross validation, which is a form of backward selection.
+With RFE we get the following results for binary classification
+
+```{python}
+print(RFE_df)
+```
+
+on this table we can compare the improvements RFE provides, able to increase binary classification accuracy by couple percent compared to including all features.
+
+<span style="color:red;">
+Note: I was using liblinear LR model which cannot do multiclass classification. fix is todo. also could add more models
+</span>
+
+
+
+```{python}
+LR1_results = cv_results[0].iloc[:40]
+LR2_results = cv_results[1].iloc[:40]
+
+plt.plot(LR1_results["n_features"], LR1_results["mean_test_score"], color='red', label='LR (Lasso)')
+plt.plot(LR2_results["n_features"], LR2_results["mean_test_score"], color='blue', label='LR (Ridge)')
+
+plt.legend()
+plt.title('RFE binary classification accuracy')
+plt.show()
+
+```
+
+We can see that increasing features results in better accuracy, usually having the best accuracy at 10-20 features.
+We currently only have linear regression with L1 (lasso) and L2 (ridge) penalties. After comparing fifferent models, we will probably use some combination of PCA and Feature selection in our final model
+
