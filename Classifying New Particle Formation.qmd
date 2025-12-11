@@ -13,7 +13,7 @@ import pandas as pd
 
 ```{python}
 #Tähän Eliaksen importit
-from subset_selection import cv_results, RFE_df
+from subset_selection import cv_results_binary, RFE_df_binary, cv_results_multi, RFE_df_multi
 ```
 
 ```{python}
@@ -65,20 +65,41 @@ Another preprocessing method is feature selection, for which we have used Recurs
 With RFE we get the following results for binary classification
 
 ```{python}
-print(RFE_df)
+print(RFE_df_binary)
+print(RFE_df_multi)
 ```
 
 on this table we can compare the improvements RFE provides, able to increase binary classification accuracy by couple percent compared to including all features.
 
 ```{python}
-LR1_results = cv_results[0].iloc[:40]
-LR2_results = cv_results[1].iloc[:40]
 
+LR1_results = cv_results_binary[0].iloc[:40]
+LR2_results = cv_results_binary[1].iloc[:40]
+DT_results = cv_results_binary[2].iloc[:40]
+
+LR1_results2 = cv_results_multi[0].iloc[:40]
+LR2_results2 = cv_results_multi[1].iloc[:40]
+DT_results2 = cv_results_multi[2].iloc[:40]
+#NB_results = cv_results[2].iloc[:40]
+
+plt.subplot(1,2,1)
 plt.plot(LR1_results["n_features"], LR1_results["mean_test_score"], color='red', label='LR (Lasso)')
 plt.plot(LR2_results["n_features"], LR2_results["mean_test_score"], color='blue', label='LR (Ridge)')
+plt.plot(DT_results["n_features"], DT_results["mean_test_score"], color='green', label='Decicion Tree')
+#plt.plot(NB_results["n_features"], NB_results["mean_test_score"], color='green', label='Naive Bayes')
 
 plt.legend()
 plt.title('RFE binary classification accuracy')
+
+plt.subplot(1,2,2)
+plt.plot(LR1_results2["n_features"], LR1_results2["mean_test_score"], color='red', label='LR (Lasso)')
+plt.plot(LR2_results2["n_features"], LR2_results2["mean_test_score"], color='blue', label='LR (Ridge)')
+plt.plot(DT_results2["n_features"], DT_results2["mean_test_score"], color='green', label='Decicion Tree')
+#plt.plot(NB_results["n_features"], NB_results["mean_test_score"], color='green', label='Naive Bayes')
+
+plt.legend()
+plt.title('RFE multiclass accuracy')
+
 plt.show()
 
 ```
