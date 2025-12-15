@@ -25,21 +25,22 @@ Group: John 117
 
 Members: Elias Toukolehto and Joacim Sarén
 
-# Preprocessing
+# Preprocessing methods
 
 We decided to start by trying feature selection and dimensionality reduction via principal component analysis with a few different machine learning models.
 
-## Principal component analysis
+# Principal component analysis
 
-First we looked at cumulative proportion of variance explained by the principal components. We used l2 normalization. We looked at the behaviour of PCA and all the models at upto 100 components, but nothing interesting happened with any of them beyond about 40 components, so the charts here focus on 40 or less components. Accuracy is measured as the average accuracy using 10-fold cross validation.
+First we looked at cumulative proportion of variance explained by the principal components. We decided to use PCA for it's relavive simplicity. We used l2 normalization in order to keep all predictors in consideration when running PCA. We looked at the behaviour of PCA and all the models at up to 100 components. We won't show data beyond 40 components, beccause it didn't show any interesting behaviour that's not visible with lower values. This is mainly to keep the charts more readable.
 
 ```{python}
 plt.plot(range(1, 41), pca.cum_pve)
 plt.hlines(1, 0, 40, 'red', 'dotted')
+plt.title('Cumulative portion of variance explained')
 plt.show()
 ```
 
-Then we looked at the accuracy of logistic regression, decision tree and gaussian naive Bayes classifiers with different numbers of principal components for binary and multiclass classification.
+Then we looked at the accuracy of logistic regression, decision tree and gaussian naive Bayes classifiers with different numbers of principal components for binary and 4-class classification using 10-fold cross-validation.
 
 ```{python}
 plt.plot(range(1, 41), pca.nbscore2, color='red', label='Naive Bayes')
@@ -47,21 +48,41 @@ plt.plot(range(1, 41), pca.treescore2, color='blue', label='Decision tree')
 plt.plot(range(1, 41), pca.lrscore2, color='green', label='logistic regression')
 plt.legend()
 plt.title('Binary classification accuracy')
+plt.grid(True, 'both')
 plt.show()
 
 plt.plot(range(1, 41), pca.nbscore4, color='red', label='Naive Bayes')
 plt.plot(range(1, 41), pca.treescore4, color='blue', label='Decision tree')
 plt.plot(range(1, 41), pca.lrscore4, color='green', label='logistic regression')
 plt.legend()
-plt.title('Multiclass classification accuracy')
+plt.title('4-class classification accuracy')
+plt.grid(True, 'both')
 plt.show()
 ```
 
-The gaussian Naive Bayes classifier with 9 predictors is clearly the best oferall performer out of the tested models.
+Logistic regression achieves the highest accuracy in both binary and 4-class classification. Because the task focuses on binary classification, which is also easier than multiclass classification, we wanted to explore a 2-tier classifier. First tier seperates events and non-events, and the 2nd classifies events to the specific event classes. To choose the model for the 2nd tier, we looked at the 3-class classification accuracy of thea same classification methods trained on data only containing events.
 
-## Feature selection
+The data with 10-fold cross-validation was inconclusive as accuracy for logistig regression jumped up and down in around the same range with 15 or less components. We suspect the main reason to be the small population of the smallest class. Out of the 225 events in the training data, only 26 are in class Ia. To smooth out the result, we decided to use 26-fold CV to match this population size. Our cross validation method maintains class sizes within folds, so the validation set always includes one Ia event. 
 
-Another preprocessing method is feature selection, for which we have used Recursive Feature elimination using 5-fold cross validation, which is a form of backward selection.
+```{python}
+plt.plot(range(1, 41), pca.nbscore3, color='red', label='Naive Bayes')
+plt.plot(range(1, 41), pca.treescore3, color='blue', label='Decision tree')
+plt.plot(range(1, 41), pca.lrscore3, color='green', label='logistic regression')
+plt.legend()
+plt.title('3-class classification accuracy')
+plt.grid(True, 'both')
+plt.show()
+```
+
+As we hoped, there results are clearer now. Logistic regression with 22 principal components has the highest accuracy, but LR with just 9 components gets close to the same reult. Naive Bayes with 16 components is between them, and clearly the best result for NB. Because we know that each component is less important than the previous one, we decided to only test LR with 9 components and NB with 16 components in our 2-tier classifier.
+
+# PCA-based 2-tier classifier
+
+Based on results shown in the previous chapter, we used logistic regression with 12 principal components to seperate events and non-events. For event classification we tested LR and NB with 9 and 16 components respectively.
+
+# Feature selection
+
+Another preprocessing method is feature selection, for which we have used Recursive Feature elimination using 5-fold cross-validation, which is a form of backward selection.
 With RFE we get the following results for binary classification
 
 ```{python}
@@ -109,7 +130,7 @@ We currently only have linear regression with L1 (lasso) and L2 (ridge) penaltie
 
 # Feature analysis
 
-Analyzing coefficients allowed us to rank some features by usefulness. The ones for the plot below were defined by performance with logistic regression using 5-fold cross validation.
+Analyzing coefficients allowed us to rank some features by usefulness. The ones for the plot below were defined by performance with logistic regression using 5-fold cross-validation.
 
 ```{python}
 df = pd.read_csv('train.csv')

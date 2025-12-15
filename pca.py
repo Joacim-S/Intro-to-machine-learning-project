@@ -46,7 +46,7 @@ for i in range(1, 41):
     pca = PCA(n_components=i)
     x = pca.fit_transform(normalized)
     x_event = pca.fit_transform(normalized_events)
-    lr = LogisticRegression()
+    lr = LogisticRegression(penalty=None,  max_iter=10000)
     tree = DecisionTreeClassifier()
     nb = GaussianNB()
     lda = LinearDiscriminantAnalysis()
@@ -55,43 +55,47 @@ for i in range(1, 41):
     lrscore2.append(np.mean(cross_val_score(lr, x, dfy2, cv=10)))
     treescore2.append(np.mean(cross_val_score(tree, x, dfy2, cv=10)))
     nbscore2.append(np.mean(cross_val_score(nb, x, dfy2, cv=10)))
-    ldascore2.append(np.mean(cross_val_score(lda, x, dfy2, cv=10)))
+    #ldascore2.append(np.mean(cross_val_score(lda, x, dfy2, cv=10)))
     #qdascore2.append(np.mean(cross_val_score(qda, x, dfy2, cv=10)))
 
     lrscore4.append(np.mean(cross_val_score(lr, x, dfy4, cv=10)))
     treescore4.append(np.mean(cross_val_score(tree, x, dfy4, cv=10)))
     nbscore4.append(np.mean(cross_val_score(nb, x, dfy4, cv=10)))
-    ldascore4.append(np.mean(cross_val_score(lda, x, dfy4, cv=10)))
+    #ldascore4.append(np.mean(cross_val_score(lda, x, dfy4, cv=10)))
     #qdascore4.append(np.mean(cross_val_score(qda, x, dfy4, cv=10)))
 
-    lrscore3.append(np.mean(cross_val_score(lr, x_event, dfy3, cv=10)))
-    treescore3.append(np.mean(cross_val_score(tree, x_event, dfy3, cv=10)))
-    nbscore3.append(np.mean(cross_val_score(nb, x_event, dfy3, cv=10)))
-    ldascore3.append(np.mean(cross_val_score(lda, x_event, dfy3, cv=10)))
+    lrscore3.append(np.mean(cross_val_score(lr, x_event, dfy3, cv=26)))
+    treescore3.append(np.mean(cross_val_score(tree, x_event, dfy3, cv=26)))
+    nbscore3.append(np.mean(cross_val_score(nb, x_event, dfy3, cv=26)))
+    #ldascore3.append(np.mean(cross_val_score(lda, x_event, dfy3, cv=10)))
 
     cum_pve.append(sum(pca.explained_variance_ratio_))
 
 #Täs alla on testiplotteja
-""" plt.plot(nbscore2, color='red')
+"""
+plt.plot(nbscore2, color='red')
 plt.plot(treescore2, color='blue')
 plt.plot(lrscore2, color='green')
-plt.plot(ldascore2, color='purple')
+#plt.plot(ldascore2, color='purple')
+plt.grid(True, 'both')
 plt.show()
-
+"""
 plt.plot(nbscore3, color='red')
 plt.plot(treescore3, color='blue')
 plt.plot(lrscore3, color='green')
-plt.plot(ldascore3, color='purple')
+plt.grid(True, 'both')
+#plt.plot(ldascore3, color='purple')
 plt.show()
-
+"""
 plt.plot(nbscore4, color='red')
 plt.plot(treescore4, color='blue')
 plt.plot(lrscore4, color='green')
-plt.plot(ldascore4, color='purple')
+plt.grid(True, 'both')
+#plt.plot(ldascore4, color='purple')
 plt.show()
+ """
 
-
-diff = []
+""" diff = []
 for a, b in zip(ldascore2, ldascore4):
     diff.append(a-b)
 
