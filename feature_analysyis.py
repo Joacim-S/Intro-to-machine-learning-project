@@ -72,7 +72,7 @@ worst5 = ['NOx672.mean', 'CO2504.std','NO168.std', 'NO336.mean', 'CO2504.std']
 best52 = ['CS.mean', 'SO2168.mean', 'SWS.mean', 'Glob.mean', 'SWS.std']
 worst52 = ['T168.std', 'NOx504.mean','H2O336.std', 'O384.mean', 'O3168.mean']
 
-fig, axs = plt.subplots(2,5)
+
 
 nonevent_df = df[df['class4'] == 'nonevent']
 event_df = df[df['class4'] != 'nonevent']
@@ -80,7 +80,7 @@ ia_df = df[df['class4'] == 'Ia']
 ib_df = df[df['class4'] == 'Ib']
 ii_df = df[df['class4'] == 'II']
 
-
+#binary boxplt
 """ for i in range(0,10):
 
   if i < 5:
@@ -90,17 +90,20 @@ ii_df = df[df['class4'] == 'II']
     axs[1,i-5].set_title(worst5[i-5])
     axs[1,i-5].boxplot([nonevent_df[worst5[i-5]], event_df[worst5[i-5]]], tick_labels=['non', 'event'], sym='_') """
 
+k = 6
+k2 = int(k/2)
+fig, axs = plt.subplots(2,k2)
+for i in range(0,k):
 
-for i in range(0,10):
-
-  if i < 5:
+  if i < k2:
     axs[0,i].set_title(best5[i])
-    l = [nonevent_df[best5[i]],event_df[worst5[i-5]], ia_df[best5[i]], ib_df[best5[i]], ii_df[best5[i]]]
+    l = [nonevent_df[best5[i]],event_df[best5[i]], ia_df[best5[i]], ib_df[best5[i]], ii_df[best5[i]]]
     axs[0,i].boxplot(l, tick_labels=['non','any', 'Ia', 'Ib', 'II'], sym='_')
   else:
-    axs[1,i-5].set_title(worst5[i-5])
-    l = [nonevent_df[worst5[i-5]],event_df[worst5[i-5]], ia_df[worst5[i-5]], ib_df[worst5[i-5]], ii_df[worst5[i-5]]]
-    axs[1,i-5].boxplot(l, tick_labels=['non','any', 'Ia', 'Ib', 'II'], sym='_')
+    j = int(i-k2)
+    axs[1,j].set_title(worst5[j])
+    l = [nonevent_df[worst5[j]],event_df[worst5[j]], ia_df[worst5[j]], ib_df[worst5[j]], ii_df[worst5[j]]]
+    axs[1,j].boxplot(l, tick_labels=['non','any', 'Ia', 'Ib', 'II'], sym='_')
 
 plt.tight_layout()
 plt.show()
