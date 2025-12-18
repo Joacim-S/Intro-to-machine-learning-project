@@ -26,13 +26,13 @@ Group: John 117
 
 Members: Elias Toukolehto and Joacim Sarén
 
-# Preprocessing methods
+# Methodology
 
 We decided to start by trying feature selection and dimensionality reduction via principal component analysis with a few different machine learning models.
 
 # Principal component analysis
 
-First we looked at cumulative proportion of variance explained by the principal components. We decided to use PCA for it's relavive simplicity. We used l2 normalization in order to keep all predictors in consideration when running PCA. We looked at the behaviour of PCA and all the models at up to 100 components. We won't show data beyond 40 components, beccause it didn't show any interesting behaviour that's not visible with lower values. This is mainly to keep the charts more readable.
+First we looked at cumulative proportion of variance explained by the principal components. We decided to use PCA for it's relavive simplicity. We used l2 normalization in order to keep all predictors in consideration when running PCA. We looked at the behaviour of PCA and some the models at up to 100 components, but settled on a maximum of 40 for comparisons. The models we did test with more diddn't show interesting behaviour beyond 40 and training random forest takes a long time with many components.
 
 ```{python}
 plt.plot(range(1, 41), pca.cum_pve)
@@ -75,11 +75,11 @@ plt.grid(True, 'both')
 plt.show()
 ```
 
-As we hoped, there results are clearer now. Logistic regression with 22 principal components has the highest accuracy, but LR with just 9 components gets close to the same reult. Naive Bayes with 16 components is between them, and clearly the best result for NB. Because we know that each component is less important than the previous one, we decided to only test LR with 9 components and NB with 16 components in our 2-tier classifier.
+The results still vary at higher component counts, but we can pick some welll performing models from the lower component count ones Random forest with 37 components has the highest accuracy, but the variance in this component count range is high. Clear improvement stops at 13 components. Logistic regression reaches its peak accuracy at 22 components, but is almost as accurate with just 9 components. Naive Bayes with 16 components is between them, and clearly the best result for NB.
 
 # PCA-based 2-tier classifier
 
-Based on results shown in the previous chapter, we used logistic regression with 12 principal components to seperate events and non-events. For event classification we tested LR and NB with 9 and 16 components respectively.
+Based on results shown in the previous chapter, we used logistic regression with 12 principal components to seperate events and non-events. For event classification we tested LR, RF and NB with 9, 13 and 16 components respectively.
 
 # Feature selection
 
