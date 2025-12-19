@@ -64,9 +64,11 @@ two_tierLR.fit(dfx, dfy)
 lrnb.fit(dfx, dfy)
 lrrf.fit(dfx, dfy)
 
-np.mean(cross_val_score(two_tierLR, dfx, dfy, scoring='accuracy', cv=10))
-np.mean(cross_val_score(lrnb, dfx, dfy, scoring='accuracy', cv=10))
-np.mean(cross_val_score(lrrf, dfx, dfy, scoring='accuracy', cv=10))
+print(
+    np.mean(cross_val_score(two_tierLR, dfx, dfy, scoring='accuracy', cv=10)),
+    np.mean(cross_val_score(lrnb, dfx, dfy, scoring='accuracy', cv=10)),
+    np.mean(cross_val_score(lrrf, dfx, dfy, scoring='accuracy', cv=10))
+)
 
 """ predicts = two_tierLR.predict(xtest)
 probs = two_tierLR.probs(xtest)

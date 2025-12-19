@@ -32,12 +32,12 @@ We were interested in comparing the effects principal component analysis and fea
 
 Our method for feature selection was Recursive Feature elimination, which required models to rank features in one way or another. Therefore we decided not to implement models that do not  have such ranking features in feature selection. Naive Bayes classifier is an example of such model. However, since the principal components are the same for each model, we had no such issues combining naive Bayes with PCA.
 
-At this point we had some models, but we were unhappy with their performance. We decided to split our model into two tiers. The first tier would only do binary classification, while the second tier would only classify between event types. This way if we found a modelthat performs better for either tier, we can combine them in our model for optimal results. Finally we tried adding more models we have encountered during the cource, but their performances were qiote low.
+At this point we had some models, but we were unhappy with their performance. We decided to split our model into two tiers. The first tier would only do binary classification, while the second tier would only classify between event types. This way if we found a modelthat performs better for either tier, we can combine them in our model for optimal results. Finally we tried adding more models we have encountered during the cource, but their performances were quitete low.
 
 
 # Principal component analysis
 
-First we looked at cumulative proportion of variance explained by the principal components. We decided to use PCA for it's relavive simplicity. We used l2 normalization in order to keep all predictors in consideration when running PCA. We looked at the behaviour of PCA and some the models at up to 100 components, but settled on a maximum of 40 for comparisons. The models we did test with more diddn't show interesting behaviour beyond 40 and training random forest takes a long time with many components.
+For dimensionality reduction, We decided to use PCA for it's relavive simplicity. First we looked at cumulative proportion of variance explained by the principal components. We used l2 normalization in order to keep all predictors in consideration when running PCA. Despite PVE rising very quickly, our models beenefitted from more features than could be expected based on a cumulative PVE, so we did not focus on the PVE result much at all. 
 
 ```{python}
 plt.plot(range(1, 41), pca.cum_pve)
@@ -46,12 +46,13 @@ plt.title('Cumulative portion of variance explained')
 plt.show()
 ```
 
-Then we looked at the accuracy of logistic regression, decision tree and gaussian naive Bayes classifiers with different numbers of principal components for binary and 4-class classification using 10-fold cross-validation.
+We looked at the behaviour of PCA and some the models at up to 100 components, but settled on a maximum of 40 for comparisons. The models we did test with more diddn't show interesting behaviour beyond 40 and training random forest takes a long time with many components. Then we looked at the accuracy of logistic regression, decision tree and gaussian naive Bayes classifiers with different numbers of principal components for binary and 4-class classification using 10-fold cross-validation. The accuracies with different principal component counts are shown below.
 
 ```{python}
 plt.plot(range(1, 41), pca.nbscore2, color='red', label='Naive Bayes')
 plt.plot(range(1, 41), pca.treescore2, color='blue', label='Decision tree')
-plt.plot(range(1, 41), pca.lrscore2, color='green', label='logistic regression')
+plt.plot(range(1, 41), pca.lrscore2, color='green', label='Logistic regression')
+plt.plot(range(1, 41), pca.rfscore2, color='purple', label='Random forest')
 plt.legend()
 plt.title('Binary classification accuracy')
 plt.grid(True, 'both')
@@ -59,11 +60,19 @@ plt.show()
 
 plt.plot(range(1, 41), pca.nbscore4, color='red', label='Naive Bayes')
 plt.plot(range(1, 41), pca.treescore4, color='blue', label='Decision tree')
-plt.plot(range(1, 41), pca.lrscore4, color='green', label='logistic regression')
+plt.plot(range(1, 41), pca.lrscore4, color='green', label='Logistic regression')
+plt.plot(range(1, 41), pca.rfscore4, color='purple', label='Random forest')
 plt.legend()
 plt.title('4-class classification accuracy')
 plt.grid(True, 'both')
 plt.show()
+
+print('Maximum accuracies')
+print(f'{'Model':20}{'Binary':9}{'4-class'}')
+print(f'{'Linear regression:':20}{max(pca.lrscore2):.5}  {max(pca.lrscore4):.5}')
+print(f'{'Naive Bayes:':20}{max(pca.nbscore2):.5}  {max(pca.nbscore4):.5}')
+print(f'{'Decision tree:':20}{max(pca.treescore2):.5}  {max(pca.treescore4):.5}')
+print(f'{'Random forest:':20}{max(pca.rfscore2):.5}  {max(pca.rfscore2):.5}')
 ```
 
 Logistic regression achieves the highest accuracy in both binary and 4-class classification. Because the task focuses on binary classification, which is also easier than multiclass classification, we wanted to explore a 2-tier classifier. First tier seperates events and non-events, and the 2nd classifies events to the specific event classes. To choose the model for the 2nd tier, we looked at the 3-class classification accuracy of thea same classification methods trained on data only containing events.
@@ -74,17 +83,40 @@ The data with 10-fold cross-validation was inconclusive as accuracy for logistig
 plt.plot(range(1, 41), pca.nbscore3, color='red', label='Naive Bayes')
 plt.plot(range(1, 41), pca.treescore3, color='blue', label='Decision tree')
 plt.plot(range(1, 41), pca.lrscore3, color='green', label='logistic regression')
+plt.plot(range(1, 41), pca.rfscore3, color='purple', label='Random forest')
 plt.legend()
 plt.title('3-class classification accuracy')
 plt.grid(True, 'both')
 plt.show()
+
+print('Maximum accuracies')
+print(f'{'Linear regression:':20}{max(pca.lrscore3):.5}')
+print(f'{'Naive Bayes:':20}{max(pca.nbscore3):.5}')
+print(f'{'Decision tree:':20}{max(pca.treescore3):.5}')
+print(f'{'Random forest:':20}{max(pca.rfscore3):.5}')
 ```
 
-The results still vary at higher component counts, but we can pick some welll performing models from the lower component count ones Random forest with 37 components has the highest accuracy, but the variance in this component count range is high. Clear improvement stops at 13 components. Logistic regression reaches its peak accuracy at 22 components, but is almost as accurate with just 9 components. Naive Bayes with 16 components is between them, and clearly the best result for NB.
+The results still vary at higher component counts, but we can pick some welll performing models from the lower component count ones Random forest with 37 components has the highest accuracy, but the variance in this component count range is high. Clear improvement stops at 13 components. Logistic regression reaches its peak accuracy at 22 components, but is almost as accurate with just 9 components. Naive Bayes with 16 components is between them, and clearly the best result for NB. We used 10-fold cross validation to determine the mean accuracy of these models.
 
 # PCA-based 2-tier classifier
 
-Based on results shown in the previous chapter, we used logistic regression with 12 principal components to seperate events and non-events. For event classification we tested LR, RF and NB with 9, 13 and 16 components respectively.
+Based on results shown in the previous chapter, we used logistic regression with 12 principal components to seperate events and non-events. For event classification we tested LR, RF and NB with 9, 13 and 16 components respectively. Combining a linear regression binary classifier with the other 3-class models got us the following 4-class classification accuracies:
+
+Linear regression: 0.534
+
+Naive Bayes: 0.547
+
+Random forest: 0.542
+
+We did not manage to improve accuracy beyond what the best individual 4-class classifiers achieved. We did not look at other performance metrics due to time constraints, but we made kaggle submissions with various models. We tested logistic regression with 12 principal components and Naive Bayes with 9 components. Logistic regression alone performed poorly, only getting a score of 0.46718. Despite having a lower accuracy, Naive Bayes got a score of 0.57045. Our 2-tier models got the following scores:
+
+Linear regression: 0.56990
+
+Naive Bayes: 0.57638
+
+Random forest: 0.58070
+
+While the scores are close, there is an improvement over the single 4-class models.
 
 # Feature selection
 
@@ -197,14 +229,13 @@ plt.show()
 
 Here are boxplots of some of the most useful (top row), and least useful (bottom row) features for binary classification in the dataset. For the reliable features we can see that the quartaile ranges don't have much overlap, as for the unreliable features there is a lot of overlap between classes. CS.mean is an outlier, where models find it very useful even though it has surprisingly similar boxplots between classes. Some features that are good with binary classification, are less useful in 3-class classification. RHIRGA672.mean is an example of such feature. This is one of the strengths of using two tiers with our model for feature selection.
 
-# The final submission
-We looked trough plenty of different models, but in the end found hat Logistic regression performs best with our data, at least according to cross-validation.
-
 # Conclusions
-We considered a few possible improvements to our model, but did not have time to implement them. One obvious idea was to increase our model from 2-tier model into a 3-tier model. This would let us improve between stages once more. The second idea was to add engineered features to the data. The data is the means and variances of different units, and by fitting them into some equation, we could have features that make classifying the data easier. We also did not take prplexity of our models at all into account, and by also measuring perplexity, we could have optimized our submissions further.
+In the end our best performing model was the 2-tier linear regression + random forest model with PCA. Improving over simple models turned out to be surprisingly difficult.
 
-We were still able to test plenty of different models, and compare their accuracy scores by adjusting our features. HAving two tiers in our models, allows us to pick the best amount of features for both stages, slightly improving our accuracy
+We had many improvement ideas in mind, many of which were implemented in the models seen in the presentations.
+One obvious idea was to increase our model from 2-tier model into a 3-tier model. This would let us improve between stages once more. The second idea was to add engineered features to the data. The data is the means and variances of different units, and by fitting them into some equation, we could have features that make classifying the data easier. We also could have used other performance metrics besides accuracy to improve our submission. Some domain knowledge or further data analysis would probably have been benefitial too. In addition, furher collaboration would allow for more model combinations. It's possible that using feature selection for one tier and PCA for another would've produced a better classifier.
+
+We were still able to test plenty of different models, and compare their accuracy scores by adjusting our features. Having two tiers in our models, allows us to pick the best amount of features for both stages, slightly improving our accuracy
 
 # Grading suggestion
-
-Even though our end results were fairly inaccurate, we used plenty of time testing different approaches in preprocessing our data and testing different models. We think that the end result and amount of effort is enough to have our group project graded 3 out of 5
+We give ourselves a grade of 3. We explain our approach well and our goals were clear from the start. The report stays on topic and our performance measures are consistent. There are obvious shortcomings which is why we would not grade this higher. In short, our project lacks the depth to be considered very good. We did not use any adcancd techiques and we only looked at model accurac as a metric because it was convinient.

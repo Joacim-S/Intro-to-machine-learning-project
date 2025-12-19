@@ -40,7 +40,7 @@ nbscore4 = []
 rfscore4 = []
 
 
-for i in range(1, 40):
+for i in range(1, 41):
     pca = PCA(n_components=i)
     x = pca.fit_transform(normalized)
     x_event = pca.fit_transform(normalized_events)

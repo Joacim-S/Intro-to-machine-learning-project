@@ -30,7 +30,7 @@ resultdf = pd.DataFrame({'id' : ids, 'class4': predictions4, 'p': probs[:,1]})
 resultdf.to_csv('pcaGNB.csv', index = False)
 
 
-pca11 = PCA(11)
+pca11 = PCA(12)
 
 x2 = pca.fit_transform(normalized)
 lr = LogisticRegression(penalty=None, max_iter=10000)
