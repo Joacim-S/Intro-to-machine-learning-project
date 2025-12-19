@@ -28,7 +28,12 @@ Members: Elias Toukolehto and Joacim Sarén
 
 # Methodology
 
-We decided to start by trying feature selection and dimensionality reduction via principal component analysis with a few different machine learning models.
+We were interested in comparing the effects principal component analysis and feature selection have on different machine learning models. We decided to rely on cross-validation for estimating accuracy. We wanted to start simple and increase the complexity of our models over time. We began with logistic regression models, and realized that we should not use L1 or L2 penalties with PCA, but decided to use them for feature selection because the performance was better. Once we had logistic regression implemented for both methologies, we moved on to other models.
+
+Our method for feature selection was Recursive Feature elimination, which required models to rank features in one way or another. Therefore we decided not to implement models that do not  have such ranking features in feature selection. Naive Bayes classifier is an example of such model. However, since the principal components are the same for each model, we had no such issues combining naive Bayes with PCA.
+
+At this point we had some models, but we were unhappy with their performance. We decided to split our model into two tiers. The first tier would only do binary classification, while the second tier would only classify between event types. This way if we found a modelthat performs better for either tier, we can combine them in our model for optimal results. Finally we tried adding more models we have encountered during the cource, but their performances were qiote low.
+
 
 # Principal component analysis
 
@@ -84,7 +89,7 @@ Based on results shown in the previous chapter, we used logistic regression with
 # Feature selection
 
 Another preprocessing method is feature selection, for which we have used Recursive Feature elimination using 5-fold cross-validation, which is a form of backward selection.
-With RFE we get the following results for binary classification
+With RFE we get the following results for binary, and 3-class classification.
 
 ```{python}
 RFE_df_binary = pd.read_csv('RFE_binary.csv')
@@ -93,7 +98,8 @@ print(RFE_df_binary)
 print(RFE_df_multi)
 ```
 
-on this table we can compare the improvements RFE provides, able to increase binary classification accuracy by couple percent compared to including all features.
+Our best model for binary classification ends up being Logistic regression with L1 penalty, using 17 features reaching accuracy of 89.5%. This is a vey slight increase to the accuracy we recieve without feature selection (89.4%).
+The increase in model performance is more significant in the 3-class classification, being around 6% for most models. Once again linear regressiion is the best performing model, and with surprisingly few features. 
 
 ```{python}
 cv_results_binary = np.load('binaryCV.npy')
@@ -117,8 +123,7 @@ plt.show()
 
 ```
 
-We can see that increasing features results in better accuracy, usually having the best accuracy at 10-20 features.
-We currently only have linear regression with L1 (lasso) and L2 (ridge) penalties. After comparing different models, we will probably use some combination of PCA and Feature selection in our final model
+We can see that increasing features results in better accuracy, usually having the best accuracy at 10-20 features. Decicion treehas it's best accuracy at only two features, while random forest has it all the way at 25. The accuracy does not increace or decreace much after 15 features for most models
 
 ```{python}
 
@@ -141,6 +146,9 @@ plt.title('RFE 3-class accuracy')
 
 plt.show() 
 ```
+
+Looking at the graph for accuracy per number of features for 3-class RFE, we can see that the differences each feature makes are lot more significant, even with 20+ features. The accuracy is quite poor, and for most models it's best with only very few features.
+
 
 # Feature analysis
 
@@ -187,4 +195,16 @@ plt.tight_layout()
 plt.show()
 ```
 
-Here are boxplots of some of the most useful (top row), and least useful (bottom row) features for binary classification in the dataset. For the reliable features we can see that the quartaile ranges don't have much overlap, as for the unreliable features there is a lot of overlap between classes. CS.mean is an oulkier, where models find it very useful even though it has surprisingly similar boxplots between classes.
+Here are boxplots of some of the most useful (top row), and least useful (bottom row) features for binary classification in the dataset. For the reliable features we can see that the quartaile ranges don't have much overlap, as for the unreliable features there is a lot of overlap between classes. CS.mean is an outlier, where models find it very useful even though it has surprisingly similar boxplots between classes. Some features that are good with binary classification, are less useful in 3-class classification. RHIRGA672.mean is an example of such feature. This is one of the strengths of using two tiers with our model for feature selection.
+
+# The final submission
+We looked trough plenty of different models, but in the end found hat Logistic regression performs best with our data, at least according to cross-validation.
+
+# Conclusions
+We considered a few possible improvements to our model, but did not have time to implement them. One obvious idea was to increase our model from 2-tier model into a 3-tier model. This would let us improve between stages once more. The second idea was to add engineered features to the data. The data is the means and variances of different units, and by fitting them into some equation, we could have features that make classifying the data easier. We also did not take prplexity of our models at all into account, and by also measuring perplexity, we could have optimized our submissions further.
+
+We were still able to test plenty of different models, and compare their accuracy scores by adjusting our features. HAving two tiers in our models, allows us to pick the best amount of features for both stages, slightly improving our accuracy
+
+# Grading suggestion
+
+Even though our end results were fairly inaccurate, we used plenty of time testing different approaches in preprocessing our data and testing different models. We think that the end result and amount of effort is enough to have our group project graded 3 out of 5
